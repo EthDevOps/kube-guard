@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-guard-webhook
+  namespace: kube-guard
+  labels:
+    app: kube-guard
+spec:
+  selector:
+    app: kube-guard
+  ports:
+  - name: webhook
+    port: 443
+    targetPort: 8443
+    protocol: TCP
+  type: ClusterIP

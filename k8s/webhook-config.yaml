@@ -1,0 +1,40 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionWebhook
+metadata:
+  name: kube-guard-validator
+webhooks:
+- name: kube-guard.example.com
+  clientConfig:
+    service:
+      name: kube-guard-webhook
+      namespace: kube-guard
+      path: "/validate"
+  rules:
+  - operations: ["CONNECT"]
+    apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods/exec", "pods/portforward"]
+  admissionReviewVersions: ["v1", "v1beta1"]
+  sideEffects: None
+  failurePolicy: Ignore
+
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionWebhook
+metadata:
+  name: kube-guard-mutator
+webhooks:
+- name: kube-guard.example.com
+  clientConfig:
+    service:
+      name: kube-guard-webhook
+      namespace: kube-guard
+      path: "/mutate"
+  rules:
+  - operations: ["CONNECT"]
+    apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods/exec", "pods/portforward"]
+  admissionReviewVersions: ["v1", "v1beta1"]
+  sideEffects: None
+  failurePolicy: Ignore

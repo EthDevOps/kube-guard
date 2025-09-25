@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-guard-config
+  namespace: kube-guard
+data:
+  config.yaml: |
+    mattermost:
+      webhook_url: "https://your-mattermost.example.com/hooks/your-webhook-id"
+      channel: "alerts"
+
+    monitored_namespace: "my-namespace"
+
+    notifications:
+      shell_access: true
+      port_forward: true
