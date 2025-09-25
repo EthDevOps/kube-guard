@@ -13,6 +13,33 @@ KubeGuard is a Kubernetes admission controller that monitors shell access (`kube
 
 ## Quick Start
 
+### Using Helm (Recommended)
+
+1. **Clone and build**:
+   ```bash
+   git clone <repository>
+   cd kube-guard
+   ```
+
+2. **Deploy with Helm**:
+   ```bash
+   ./helm-deploy.sh --webhook-url "https://your-mattermost.example.com/hooks/your-webhook-id"
+   ```
+
+   Or with custom namespace monitoring:
+   ```bash
+   ./helm-deploy.sh \
+     --webhook-url "https://your-mattermost.example.com/hooks/your-webhook-id" \
+     --monitored-namespace "production"
+   ```
+
+3. **Test**:
+   ```bash
+   kubectl exec -it <pod-name> -n my-namespace -- /bin/bash
+   ```
+
+### Using Kubernetes Manifests
+
 1. **Clone and build**:
    ```bash
    git clone <repository>
@@ -35,14 +62,33 @@ KubeGuard is a Kubernetes admission controller that monitors shell access (`kube
    ./deploy.sh
    ```
 
-4. **Test**:
-   ```bash
-   kubectl exec -it <pod-name> -n my-namespace -- /bin/bash
-   ```
-
 ## Configuration
 
-The admission controller is configured via a ConfigMap (`kube-guard-config`) in the `kube-guard` namespace:
+### Helm Configuration
+
+When using Helm, configure KubeGuard through `values.yaml` or command-line parameters:
+
+```yaml
+config:
+  mattermost:
+    webhookUrl: "https://your-mattermost.example.com/hooks/your-webhook-id"
+    channel: "alerts"
+  monitoredNamespace: "my-namespace"
+  notifications:
+    shellAccess: true
+    portForward: true
+```
+
+Key Helm values:
+- `config.mattermost.webhookUrl`: Your Mattermost incoming webhook URL
+- `config.mattermost.channel`: Target channel for notifications (without #)
+- `config.monitoredNamespace`: Namespace to monitor
+- `config.notifications.shellAccess`: Enable/disable shell access notifications
+- `config.notifications.portForward`: Enable/disable port forward notifications
+
+### Kubernetes Manifests Configuration
+
+When using raw Kubernetes manifests, configure via ConfigMap (`kube-guard-config`):
 
 ```yaml
 mattermost:
@@ -55,14 +101,6 @@ notifications:
   shell_access: true
   port_forward: true
 ```
-
-### Configuration Options
-
-- `mattermost.webhook_url`: Your Mattermost incoming webhook URL
-- `mattermost.channel`: Target channel for notifications (without #)
-- `monitored_namespace`: Namespace to monitor (default: "my-namespace")
-- `notifications.shell_access`: Enable/disable shell access notifications
-- `notifications.port_forward`: Enable/disable port forward notifications
 
 ## Architecture
 
@@ -112,6 +150,27 @@ Time: 2024-01-15 14:31:10 UTC
 
 ## Troubleshooting
 
+### Helm Deployment
+
+1. **Check Helm release status**:
+   ```bash
+   helm status kube-guard
+   helm get values kube-guard
+   ```
+
+2. **Check pod logs**:
+   ```bash
+   kubectl logs -n kube-guard deployment/kube-guard
+   ```
+
+3. **Update configuration**:
+   ```bash
+   helm upgrade kube-guard ./helm/kube-guard \
+     --set config.mattermost.webhookUrl="NEW_URL"
+   ```
+
+### Kubernetes Manifests
+
 1. **Check pod logs**:
    ```bash
    kubectl logs -n kube-guard deployment/kube-guard
@@ -135,6 +194,15 @@ Time: 2024-01-15 14:31:10 UTC
    ```
 
 ## Uninstall
+
+### Helm
+
+```bash
+helm uninstall kube-guard
+kubectl delete namespace kube-guard
+```
+
+### Kubernetes Manifests
 
 ```bash
 kubectl delete validatingadmissionwebhook kube-guard-validator
