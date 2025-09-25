@@ -14,6 +14,8 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+logger.info(f"DEBUG: Module loading, __name__ = {__name__}")
+
 class KubeGuardController:
     def __init__(self):
         self.config_data = {}
@@ -149,7 +151,11 @@ class KubeGuardController:
             logger.error(f"Error processing admission request: {e}")
 
 # Global controller instance
-controller = KubeGuardController()
+try:
+    controller = KubeGuardController()
+except Exception as e:
+    logger.warning(f"Failed to initialize KubeGuardController: {e}")
+    controller = None
 
 @app.route('/healthz', methods=['GET'])
 def health_check():
@@ -220,5 +226,18 @@ def mutate():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+    logger.info(f"DEBUG: Entering __main__ block, __name__ = {__name__}")
     port = int(os.getenv('PORT', 8443))
-    app.run(host='0.0.0.0', port=port, ssl_context='adhoc')
+
+    # Check if TLS certificates are mounted
+    tls_cert_path = '/etc/tls/tls.crt'
+    tls_key_path = '/etc/tls/tls.key'
+
+    if os.path.exists(tls_cert_path) and os.path.exists(tls_key_path):
+        logger.info("Using mounted TLS certificates")
+        ssl_context = (tls_cert_path, tls_key_path)
+    else:
+        logger.info("Using adhoc TLS certificates")
+        ssl_context = 'adhoc'
+
+    app.run(host='0.0.0.0', port=port, ssl_context=ssl_context)

@@ -48,11 +48,15 @@ spec:
           {{- toYaml .Values.deployment.resources | nindent 10 }}
         securityContext:
           {{- toYaml .Values.deployment.securityContext | nindent 10 }}
+        {{- if .Values.webhook.tls.enabled }}
         volumeMounts:
         - name: tls-certs
           mountPath: /etc/tls
           readOnly: true
+        {{- end }}
       volumes:
+      {{- if .Values.webhook.tls.enabled }}
       - name: tls-certs
         secret:
           secretName: {{ .Values.webhook.tls.secretName | default (printf "%s-tls" (include "kube-guard.fullname" .)) }}
+      {{- end }}

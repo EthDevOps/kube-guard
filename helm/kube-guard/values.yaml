@@ -90,10 +90,13 @@ webhook:
 
   # TLS configuration
   tls:
-    # If false, certificates will be generated automatically
+    # Enable TLS for webhook (recommended: true)
+    enabled: true
+    # If true, you must provide your own TLS certificate secret
+    # If false, certificates will be generated automatically using Kubernetes CSR
     provided: false
-    # If provided is true, specify the secret name containing tls.crt and tls.key
-    secretName: kube-guard-tls
+    # Secret name containing tls.crt and tls.key (only needed if provided: true)
+    secretName: ""
 
 # RBAC
 rbac:
