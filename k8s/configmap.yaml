@@ -10,6 +10,7 @@ data:
       channel: "alerts"
 
     monitored_namespace: "my-namespace"
+    cluster_name: "my-cluster"
 
     notifications:
       shell_access: true

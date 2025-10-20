@@ -121,27 +121,22 @@ class KubeGuardController:
             username, groups = self.get_user_info(admission_request)
             namespace = admission_request.get('namespace', '')
             resource = admission_request.get('kind', {}).get('kind', '')
+            cluster_name = self.config_data.get('cluster_name','in-cluster')
 
             message = None
 
             if self.is_shell_access(admission_request):
                 if self.config_data.get('notifications', {}).get('shell_access', True):
                     pod_name = admission_request.get('name', 'unknown')
-                    message = (f":warning: **Shell Access Alert**\n"
-                             f"User: `{username}`\n"
-                             f"Namespace: `{namespace}`\n"
-                             f"Pod: `{pod_name}`\n"
-                             f"Action: Shell access (kubectl exec)\n"
+                    message = (f":warning: **Shell Access Alert** on cluster `{cluster_name}`\n"
+                             f"User `{username}` opened a shell to pod `{namespace}/{pod_name}`\n"
                              f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
 
             elif self.is_port_forward(admission_request):
                 if self.config_data.get('notifications', {}).get('port_forward', True):
                     pod_name = admission_request.get('name', 'unknown')
-                    message = (f":warning: **Port Forward Alert**\n"
-                             f"User: `{username}`\n"
-                             f"Namespace: `{namespace}`\n"
-                             f"Pod: `{pod_name}`\n"
-                             f"Action: Port forwarding\n"
+                    message = (f":warning: **Port Forward Alert** on cluster `{cluster_name}\n"
+                             f"User `{username}` created a port-forward to pod `{namespace}/{pod_name}`\n"
                              f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
 
             if message:
