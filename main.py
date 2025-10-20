@@ -199,10 +199,7 @@ def mutate():
         admission_review = request.get_json()
         admission_request = admission_review['request']
 
-        # Process the request for notifications
-        controller.process_admission_request(admission_request)
-
-        # No mutations, just allow
+        # No mutations, just allow (notification handled by /validate endpoint)
         admission_response = {
             'uid': admission_request.get('uid'),
             'allowed': True,
